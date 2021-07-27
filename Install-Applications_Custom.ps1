@@ -219,37 +219,6 @@ catch {
 }
 #endregion
 
-#region Setup RDP ShortPath
-$Name1 = "fUseUdpPortRedirector"
-$Name2 = "UdpPortNumber"
-$value = "1"
-# Add Registry value
-try {
-    $WinstationsKey = 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations'
-    New-ItemProperty -Path $WinstationsKey -Name $Name1 -Value $value -PropertyType DWORD -Force |out-file "C:\TCS\RDPShortPathReg.txt"
-    New-ItemProperty -Path $WinstationsKey -Name $Name2 -Value $value -PropertyType DWORD -Force |out-file "C:\TCS\RDPShortPathReg.txt"
-    New-NetFirewallRule -DisplayName 'Remote Desktop - Shortpath (UDP-In)'  -Action Allow -Description 'Inbound rule for the Remote Desktop service to allow RDP traffic. [UDP 3390]' -Group '@FirewallAPI.dll,-28752' -Name 'RemoteDesktop-UserMode-In-Shortpath-UDP'  -PolicyStore PersistentStore -Profile Domain, Private -Service TermService -Protocol udp -LocalPort 3390 -Program '%SystemRoot%\system32\svchost.exe' -Enabled:True
-    if ((Get-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations").PSObject.Properties.Name -contains $Name1) 
-    {
-        Write-log "Added RDP ShortPath DWORD"
-    }
-    else 
-    {
-        write-log "Failed to Add RDP ShortPath DWORD"
-    }
-    if ((Get-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations").PSObject.Properties.Name -contains $Name2) {
-        Write-log "Added RDP ShortPath DWORD"
-    }
-    else {
-        write-log "Failed to Add RDP ShortPath DWORD"
-    }
-}
-catch {
-    $ErrorMessage = $_.Exception.message
-    write-log "Error adding RDP ShortPath Registries: $ErrorMessage"
-}
-#endregion
-
 #region Time Zone Redirection
 $Name = "fEnableTimeZoneRedirection"
 $value = "1"
